@@ -1,0 +1,4 @@
+# Conheça o marujo digital!
+Marujo Digital é o programa usado para transmitir imagens ao vivo de uma câmera em um barco em alto-mar para um computador em terra, e usa a biblioteca de sockets em Python para estabelecer a comunicação entre os dois dispositivos. A câmera no barco captura imagens e as codifica em pacotes de dados, que são enviados através da internet para o computador em terra.
+
+A biblioteca de sockets permite que os pacotes de dados sejam transmitidos de forma confiável e eficiente, garantindo que as imagens cheguem ao computador sem perda de qualidade ou atraso. O programa em terra usa a mesma biblioteca de sockets para receber os pacotes de dados da câmera e decodificá-los em imagens em tempo real.

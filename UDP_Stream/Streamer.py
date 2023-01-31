@@ -1,47 +1,41 @@
 # This is server code to send video and audio frames over UDP/TCP
 
-import cv2, imutils, socket
-import numpy as np
-import time
-import base64
-import threading, wave, pyaudio,pickle,struct
-import sys
-import queue
-import os
+import cv2, imutils, socket, queue, os, time, base64, queue, os
 
-q = queue.Queue(maxsize=10)
-
-filename =  'assets/WarBoat.mp4'
-command = "ffmpeg -i {} -ab 160k -ac 2 -ar 44100 -vn {}".format(filename,'temp.wav')
-os.system(command)
-
-# Criando socket e abrindo a conexão
+# region Criando socket e abrindo a conexão
 BUFF_SIZE = 65536
+
+# Criando as definições do socket
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,BUFF_SIZE)
+
+# Definindo endereço do socket
 host_name = socket.gethostname()
 host_ip = socket.gethostbyname(host_name)
 port = 8080
 socket_address = (host_ip,port)
+
+# Ligando socket e notificando
 server_socket.bind(socket_address)
 print('Enviando de :',socket_address)
+#endregion
 
-vid = cv2.VideoCapture("Assets\WarBoat.mp4")
+#region Declarando variaveis importantes para o video
+filename =  "../Assets/WarBoat.mp4"
+q = queue.Queue(maxsize=10)
+vid = cv2.VideoCapture(filename)
 FPS = vid.get(cv2.CAP_PROP_FPS)
 global TS
 TS = (0.5/FPS)
 BREAK=False
-print('FPS:',FPS,TS)
-totalNoFrames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
-durationInSeconds = float(totalNoFrames) / float(FPS)
-d=vid.get(cv2.CAP_PROP_POS_MSEC)
-print(durationInSeconds,d)
+#endregion
+
 
 def video_stream_gen():
-   
     WIDTH=400
     while(vid.isOpened()):
         try:
+            # Recebendo o frame e redimensionando para reduzir o tamanho do pacote para envio
             _,frame = vid.read()
             frame = imutils.resize(frame,width=WIDTH)
             q.put(frame)
@@ -55,11 +49,11 @@ def video_stream_gen():
 def video_stream():
     global TS
     fps,st,frames_to_count,cnt = (0,0,1,0)
-    cv2.namedWindow('TRANSMITTING VIDEO')        
-    cv2.moveWindow('TRANSMITTING VIDEO', 10,30) 
+    cv2.namedWindow('Transmitindo video')        
+    cv2.moveWindow('Transmitindo video', 10,30) 
     while True:
         msg,client_addr = server_socket.recvfrom(BUFF_SIZE)
-        print('GOT connection from ',client_addr)
+        print('Conexao estabelecida com ',client_addr)
         WIDTH=400
         
         while(True):
@@ -85,42 +79,17 @@ def video_stream():
             
             
             
-            cv2.imshow('TRANSMITTING VIDEO', frame)
+            cv2.imshow('Transmitindo video!', frame)
             key = cv2.waitKey(int(1000*TS)) & 0xFF	
             if key == ord('q'):
                 os._exit(1)
                 TS=False
                 break	
                 
-
-def audio_stream():
-    s = socket.socket()
-    s.bind((host_ip, (port-1)))
-
-    s.listen(5)
-    CHUNK = 1024
-    wf = wave.open("temp.wav", 'rb')
-    p = pyaudio.PyAudio()
-    print('server listening at',(host_ip, (port-1)))
-    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                    channels=wf.getnchannels(),
-                    rate=wf.getframerate(),
-                    input=True,
-                    frames_per_buffer=CHUNK)
-
-    client_socket,addr = s.accept()
-
-    while True:
-        if client_socket:
-            while True:
-                data = wf.readframes(CHUNK)
-                a = pickle.dumps(data)
-                message = struct.pack("Q",len(a))+a
-                client_socket.sendall(message)
-                
+# Ignore
 
 from concurrent.futures import ThreadPoolExecutor
 with ThreadPoolExecutor(max_workers=3) as executor:
-    executor.submit(audio_stream)
+    #executor.submit(audio_stream)
     executor.submit(video_stream_gen)
     executor.submit(video_stream)
