@@ -7,7 +7,7 @@ BUFF_SIZE = 65536
 BREAK = False
 client_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 client_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,BUFF_SIZE)
-host_ip = '26.216.222.96'
+host_ip = '10.8.0.58'
 port = 8080
 message = b'Hello'
 client_socket.sendto(message,(host_ip,port))
@@ -16,6 +16,8 @@ client_socket.sendto(message,(host_ip,port))
 width = 1280
 height = 720
 
+
+#Used vars : client_socket, BUFF_SIZE 
 def video_stream():
 	# Abrindo a janela e definindo variáveis de execução
 	cv2.namedWindow('RECEIVING VIDEO') 
@@ -48,7 +50,6 @@ def video_stream():
 		
 	client_socket.close()
 	cv2.destroyAllWindows() 
-
 # Ignore
 
 

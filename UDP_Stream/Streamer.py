@@ -23,7 +23,7 @@ print('Enviando de :',socket_address)
 #region Declarando variaveis importantes para o video
 filename =  "../Assets/WarBoat.mp4"
 q = queue.Queue(maxsize=10)
-vid = cv2.VideoCapture(filename)
+vid = cv2.VideoCapture(0)
 FPS = vid.get(cv2.CAP_PROP_FPS)
 global TS
 TS = (0.5/FPS)
@@ -85,8 +85,7 @@ def video_stream():
                 os._exit(1)
                 TS=False
                 break	
-                
-# Ignore
+
 
 from concurrent.futures import ThreadPoolExecutor
 with ThreadPoolExecutor(max_workers=3) as executor:

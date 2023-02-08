@@ -8,10 +8,29 @@ import queue
 import os
 import pyaudio
 
+
+# Used vars : vid, width, q, BREAK
+def video_stream_gen(WIDTH):
+    
+    while(vid.isOpened()):
+        try:
+            # Recebendo o frame e redimensionando para reduzir o tamanho do pacote para envio
+            _,frame = vid.read()
+            frame = imutils.resize(frame,width=WIDTH)
+            q.put(frame)
+        except:
+            os._exit(1)
+    print('Player fechado')
+    BREAK=True
+    vid.release()
+	
+
+
+
+
+
 # Streamer Functions :
-
-
-def send_video_stream_gen(q, vid):
+def send_video_stream_gen(q, vid, BREAK,WIDTH):
     WIDTH = 400
     while (vid.isOpened()):
         try:
